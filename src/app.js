@@ -103,13 +103,15 @@ app.post("/participants", async (req, res) => {
 		return res.sendStatus(409)
 	}
 
+	const sanitizedName = name.name.replace(/<\/?[^>]+(>|$)/g, "").trim();
+
 	await db.collection("participants").insertOne({
-		name: name.name,
+		name: sanitizedName,
 		lastStatus: Date.now()
 	})
 
 	await db.collection("messages").insertOne({
-		from: name.name,
+		from: sanitizedName,
 		to: 'Todos',
 		text: "entra na sala...",
 		type: "status",
@@ -145,8 +147,8 @@ app.post("/messages", async (req, res) => {
 
 	db.collection("messages").insertOne({
 		from: user,
-		to: message.to,
-		text: message.text,
+		to: message.to.replace(/<\/?[^>]+(>|$)/g, "").trim(),
+		text: message.text.replace(/<\/?[^>]+(>|$)/g, "").trim(),
 		type: message.type,
 		time: getCurrentTime()
 	})
