@@ -21,8 +21,9 @@ mongoClient.connect().then(() => {
 
 
 //GET routes
-app.get("/participants", (req, res) => {
-	res.sendStatus(200)
+app.get("/participants", async (req, res) => {
+	const participants = await db.collection("participants").find().toArray();
+	res.status(200).send(participants)
 });
 
 app.get("/messages", (req, res) => {
@@ -41,8 +42,6 @@ app.post("/participants", async (req, res) => {
 	if (validation.error){
 		return res.status(422).send(validation.error.details)
 	}
-
-	console.log(db.collection("participants").findOne(name))
 
 	const alreadyExists = await db.collection("participants").findOne(name)
 
