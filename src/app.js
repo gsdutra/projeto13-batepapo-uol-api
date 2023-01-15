@@ -33,8 +33,16 @@ app.get("/participants", async (req, res) => {
 	res.status(200).send(participants)
 });
 
-app.get("/messages", (req, res) => {
-	res.sendStatus(200)
+app.get("/messages", async (req, res) => {
+	const limit = req.query.limit;
+	const user = req.headers.user;
+	let messagesArray = await db.collection("messages").find().toArray();
+
+	if (parseInt(limit)){
+		messagesArray = messagesArray.slice(-1*(Number(limit)))
+	}
+
+	res.status(200).send(messagesArray);
 });
 
 
