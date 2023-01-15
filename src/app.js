@@ -20,6 +20,11 @@ mongoClient.connect().then(() => {
 	db = mongoClient.db();
 });
 
+function getCurrentTime(){
+	//format: HH:MM:SS
+	return `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`
+}
+
 
 //GET routes
 app.get("/participants", async (req, res) => {
@@ -54,6 +59,14 @@ app.post("/participants", async (req, res) => {
 	db.collection("participants").insertOne({
 		name: name.name,
 		lastStatus: Date.now()
+	})
+
+	db.collection("messages").insertOne({
+		from: name.name,
+		to: 'Todos',
+		text: "entra na sala...",
+		type: "status",
+		time: getCurrentTime()
 	})
 	res.sendStatus(201)
 });
@@ -90,7 +103,7 @@ app.post("/messages", async (req, res) => {
 		to: message.to,
 		text: message.text,
 		type: message.type,
-		time: `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`
+		time: getCurrentTime()
 	})
 	res.sendStatus(201)
 });
