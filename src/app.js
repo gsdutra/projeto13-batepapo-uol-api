@@ -23,7 +23,16 @@ mongoClient.connect().then(() => {
 
 function getCurrentTime(){
 	//format: HH:MM:SS
-	return `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`
+	return `${dayjs().hour().toLocaleString('en-US', {
+		minimumIntegerDigits: 2,
+		useGrouping: false
+	  })}:${dayjs().minute().toLocaleString('en-US', {
+		minimumIntegerDigits: 2,
+		useGrouping: false
+	  })}:${dayjs().second().toLocaleString('en-US', {
+		minimumIntegerDigits: 2,
+		useGrouping: false
+	  })}`
 }
 
 
