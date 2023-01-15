@@ -67,8 +67,10 @@ app.get("/messages", async (req, res) => {
 	const user = req.headers.user;
 	let messagesArray = await db.collection("messages").find().toArray();
 
-	if (parseInt(limit)){
+	if (parseInt(limit) && parseInt(limit) > 0 && Number(limit)){
 		messagesArray = messagesArray.slice(-1*(Number(limit)))
+	}else{
+		return res.sendStatus(422);
 	}
 
 	messagesArray = messagesArray.filter((elem)=>(
@@ -101,12 +103,12 @@ app.post("/participants", async (req, res) => {
 		return res.sendStatus(409)
 	}
 
-	db.collection("participants").insertOne({
+	await db.collection("participants").insertOne({
 		name: name.name,
 		lastStatus: Date.now()
 	})
 
-	db.collection("messages").insertOne({
+	await db.collection("messages").insertOne({
 		from: name.name,
 		to: 'Todos',
 		text: "entra na sala...",
