@@ -42,6 +42,12 @@ app.get("/messages", async (req, res) => {
 		messagesArray = messagesArray.slice(-1*(Number(limit)))
 	}
 
+	messagesArray = messagesArray.filter((elem)=>(
+		elem.to === "Todos" ||
+		elem.to === user ||
+		elem.from === user
+	))
+
 	res.status(200).send(messagesArray);
 });
 
