@@ -20,6 +20,7 @@ mongoClient.connect().then(() => {
 	db = mongoClient.db();
 });
 
+setInterval(removeOldUsers, 15000)
 
 function getCurrentTime(){
 	//format: HH:MM:SS
@@ -35,6 +36,25 @@ function getCurrentTime(){
 	  })}`
 }
 
+async function removeOldUsers(){
+	const participants = await db.collection("participants").find().toArray()
+
+	for (let index = 0; index < participants.length; index++) {
+		if ((Date.now() - participants[index].lastStatus) > 10000){
+
+			db.collection("participants").deleteOne({__id: participants[index].__id});
+
+			db.collection("messages").insertOne({
+				from: participants[index].name,
+				to: 'Todos',
+				text: 'sai da sala...',
+				type: 'status',
+				time: getCurrentTime()
+			})
+
+		}
+	}
+}
 
 //GET routes
 app.get("/participants", async (req, res) => {
@@ -132,6 +152,7 @@ app.post("/messages", async (req, res) => {
 });
 
 app.post("/status", async (req, res) => {
+
 	const user = req.headers.user
 
 	const doesUserExists = await db.collection("participants").findOne({name: user})
@@ -141,6 +162,7 @@ app.post("/status", async (req, res) => {
 	}
 
 	db.collection("participants").updateOne({name: user}, {$set: {lastStatus: Date.now()}})
+
 	res.sendStatus(200)
 });
 
