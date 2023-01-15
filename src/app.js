@@ -2,6 +2,7 @@ import express from "express";
 import { MongoClient } from "mongodb";
 import cors from 'cors';
 import joi from 'joi';
+import dayjs from "dayjs";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -32,6 +33,7 @@ app.get("/messages", (req, res) => {
 
 
 //POST routes
+
 app.post("/participants", async (req, res) => {
 	const name = req.body;
 	const nameSchema = joi.object({
@@ -56,14 +58,46 @@ app.post("/participants", async (req, res) => {
 	res.sendStatus(201)
 });
 
-app.post("/messages", (req, res) => {
+app.post("/messages", async (req, res) => {
+
+	const user = req.headers.user
+	const message = req.body
+	const msgSchema = joi.object({
+		to: joi.string().required(),
+		text: joi.string().required(),
+		type: joi.string().required()
+	})
+	const validation = msgSchema.validate(message);
+
+	if (validation.error){
+		return res.status(422).send(validation.error.details)
+	}
+
+	if (message.type !== "message" && message.type !== "private_message"){
+		return res.sendStatus(422)
+	}
+
+	const doesUserExists = await db.collection("participants").findOne({name: user})
+
+	console.log(doesUserExists)
+
+	if (!doesUserExists){
+		return res.status(422).send("Usuário não registrado");
+	}
+
+	db.collection("messages").insertOne({
+		from: user,
+		to: message.to,
+		text: message.text,
+		type: message.type,
+		time: `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`
+	})
 	res.sendStatus(201)
 });
 
 app.post("/status", (req, res) => {
 	res.sendStatus(201)
 });
-
 
 
 
