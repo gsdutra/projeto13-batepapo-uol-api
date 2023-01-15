@@ -20,6 +20,7 @@ mongoClient.connect().then(() => {
 	db = mongoClient.db();
 });
 
+
 function getCurrentTime(){
 	//format: HH:MM:SS
 	return `${dayjs().hour()}:${dayjs().minute()}:${dayjs().second()}`
@@ -56,6 +57,7 @@ app.post("/participants", async (req, res) => {
 
 		return res.sendStatus(409)
 	}
+
 	db.collection("participants").insertOne({
 		name: name.name,
 		lastStatus: Date.now()
@@ -92,8 +94,6 @@ app.post("/messages", async (req, res) => {
 
 	const doesUserExists = await db.collection("participants").findOne({name: user})
 
-	console.log(doesUserExists)
-
 	if (!doesUserExists){
 		return res.status(422).send("Usuário não registrado");
 	}
@@ -108,8 +108,17 @@ app.post("/messages", async (req, res) => {
 	res.sendStatus(201)
 });
 
-app.post("/status", (req, res) => {
-	res.sendStatus(201)
+app.post("/status", async (req, res) => {
+	const user = req.headers.user
+
+	const doesUserExists = await db.collection("participants").findOne({name: user})
+
+	if (!doesUserExists){
+		return res.status(404).send("Usuário não registrado");
+	}
+
+	db.collection("participants").updateOne({name: user}, {$set: {lastStatus: Date.now()}})
+	res.sendStatus(200)
 });
 
 
