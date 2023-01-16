@@ -1,5 +1,5 @@
 import express from "express";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import cors from 'cors';
 import joi from 'joi';
 import dayjs from "dayjs";
@@ -173,5 +173,33 @@ app.post("/status", async (req, res) => {
 });
 
 
+//DELETE routes
+
+app.delete("/messages/:id", async (req, res) => {
+	const id = req.params.id;
+	const user = req.headers.user;
+
+	console.log(id)
+
+	const messages = await db.collection("messages").findOne( {_id:ObjectId(id)} )
+
+	console.log(messages)
+
+	if (messages){
+		if (messages.from === user){
+			try {
+				db.collection("messages").deleteOne({_id:ObjectId(id)})
+				return res.sendStatus(200)
+			} catch (error) {
+				return res.status(500).send(err.message);
+			}
+		}else{
+			return res.sendStatus(401)
+		}
+	}else{
+		return res.status(404).send("Mensagem não encontrada")
+	}
+
+})
 
 app.listen(PORT, ()=>console.log(`Server running on port ${PORT}`));
