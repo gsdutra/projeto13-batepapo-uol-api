@@ -67,10 +67,12 @@ app.get("/messages", async (req, res) => {
 	const user = req.headers.user;
 	let messagesArray = await db.collection("messages").find().toArray();
 
-	if (parseInt(limit) && parseInt(limit) > 0 && Number(limit)){
-		messagesArray = messagesArray.slice(-1*(Number(limit)))
-	}else{
-		return res.sendStatus(422);
+	if (limit !== undefined){
+		if (parseInt(limit) && parseInt(limit) > 0 && Number(limit)){
+			messagesArray = messagesArray.slice(-1*(Number(limit)))
+		}else{
+			return res.sendStatus(422);
+		}
 	}
 
 	messagesArray = messagesArray.filter((elem)=>(
