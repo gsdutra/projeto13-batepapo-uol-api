@@ -191,7 +191,7 @@ app.delete("/messages/:id", async (req, res) => {
 				db.collection("messages").deleteOne({_id:ObjectId(id)})
 				return res.sendStatus(200)
 			} catch (error) {
-				return res.status(500).send(err.message);
+				return res.status(500).send(error.message);
 			}
 		}else{
 			return res.sendStatus(401)
